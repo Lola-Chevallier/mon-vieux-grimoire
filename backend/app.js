@@ -1,8 +1,8 @@
 const express = require('express');
-
 const app = express();
-
 const mongoose = require('mongoose');
+
+const Book = require('./models/Book');
 
 mongoose.connect('mongodb+srv://lolachevallier:8O93kpAJp3Cbjonu@cluster0.4oizoh5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
     { useNewUrlParser: true,
@@ -19,11 +19,14 @@ app.use((req, res, next) => {
     next();
 });
 
-app.post('/api/stuff', (req, res, next) => {
-    console.log(req.body);
-    res.status(201).json({
-      message: 'Objet créé !'
+app.post('/api/books', (req, res, next) => {
+    delete req.body._id;
+    const book = new Book({
+     ...req.body   
     });
+    book.save()
+        .then(() => res.satus(201).json({ message: 'Livre enregistré !' }))
+        .catch(error => res.status(400).json({ error }));
     next();
 });
 
@@ -33,26 +36,33 @@ app.get('/', (req, res, next) => {
     next();
 });
 
-app.get('/api/stuff', (req, res, next) => {
-    const stuff = [
-      {
-        _id: 'oeihfzeoi',
-        title: 'Mon premier objet',
-        description: 'Les infos de mon premier objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 4900,
-        userId: 'qsomihvqios',
-      },
-      {
-        _id: 'oeihfzeomoihi',
-        title: 'Mon deuxième objet',
-        description: 'Les infos de mon deuxième objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 2900,
-        userId: 'qsomihvqios',
-      },
-    ];
-    res.status(200).json(stuff);
+// Route modification livre
+app.put('/api/books/:id', (req, res) => {
+    Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
+        .then(() => res.status(200).json({ message: 'Livre modifié !'}))
+        .catch(error => res.status(400).json({ error }));
+})
+
+// Route suppression livre
+app.delete('/api/books/:id', (req, res) => {
+    Book.deleteOne({ _id: req.params.id })
+        .then(() => res.status(200).json({ message: 'Livre supprimé!'}))
+        .catch(error => res.status(400).json({ error }));
+
+})
+
+// Route affichage livre unique
+app.get('/api/books/:id', (req, res) => {
+    Book.findOne({ _id: req.params.id })
+        .then(book => res.status(200).json(book))
+        .catch(error => res.status(404).json({ error }));
+});
+
+// Route affichages livres
+app.get('/api/books', (req, res) => {
+    Book.find()
+        .then( books => res.status(200).json(books))
+        .catch(error => res.status(400).json({ error }));
 });
 
 module.exports = app;
