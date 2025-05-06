@@ -1,6 +1,7 @@
-const express = require('express');
 const router = express.Router();
+const express = require('express');
 const bookCtrl = require('../controllers/book');
+const auth = require('auth');
 
 // Ajout conseillé par chat gpt car error 404 sans ça
 router.get('/', (req, res, next) => {
@@ -9,18 +10,18 @@ router.get('/', (req, res, next) => {
 });
 
 // Route ajout livre
-router.post('/', bookCtrl.createBook);
+router.post('/', auth, bookCtrl.createBook);
 
 // Route modification livre
-router.put('/:id', bookCtrl.modifyBook);
+router.put('/:id',auth, bookCtrl.modifyBook);
 
 // Route suppression livre
-router.delete('/:id', bookCtrl.deleteBook);
+router.delete('/:id',auth, bookCtrl.deleteBook);
 
 // Route affichage livre unique
-router.get('/:id', bookCtrl.getOneBook);
+router.get('/:id',auth, bookCtrl.getOneBook);
 
 // Route affichages livres
-router.get('/', bookCtrl.getAllBooks);
+router.get('/',auth, bookCtrl.getAllBooks);
 
 module.exports = router;
