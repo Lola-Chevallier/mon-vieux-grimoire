@@ -1,7 +1,8 @@
 const router = express.Router();
 const express = require('express');
 const bookCtrl = require('../controllers/book');
-const auth = require('auth');
+const auth = require('../middleware/auth');
+const multer = require('../middleware/multer-config');
 
 // Ajout conseillé par chat gpt car error 404 sans ça
 router.get('/', (req, res, next) => {
@@ -10,10 +11,10 @@ router.get('/', (req, res, next) => {
 });
 
 // Route ajout livre
-router.post('/', auth, bookCtrl.createBook);
+router.post('/', auth, multer, bookCtrl.createBook);
 
 // Route modification livre
-router.put('/:id',auth, bookCtrl.modifyBook);
+router.put('/:id',auth, multer, bookCtrl.modifyBook);
 
 // Route suppression livre
 router.delete('/:id',auth, bookCtrl.deleteBook);
