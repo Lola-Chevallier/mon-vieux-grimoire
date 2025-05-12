@@ -20,6 +20,10 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get('/', (req, res) => {
+    res.send('Bienvenue sur l\'API Livres !');
+});
+
 app.use('/api/books', bookRoutes);
 app.use('/api/auth', userRoutes);
 

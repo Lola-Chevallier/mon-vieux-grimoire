@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Création d'un compte utilisateur
 exports.signup = (req, res, next) => {
@@ -20,7 +22,7 @@ exports.signup = (req, res, next) => {
 
 // Vérifier que l'e-mail entré par l'utilisateur correspond à un utilisateur existant de la base de données
 exports.login = (req, res, next) => {
-    user.findOne({ email: req.body.email })
+    User.findOne({ email: req.body.email })
         .then(user => {
             if (user === null) {
                 res.status(401).json({ message: 'Paire identifiant / mot de passe incorrecte' });
@@ -32,16 +34,22 @@ exports.login = (req, res, next) => {
                         } else {
                             res.status(200).json({
                                 userId: user._id,
-                                token: 'TOKEN'
+                                token: jwt.sign(
+                                    { userId: user._id },
+                                    process.env.JWT_SECRET,
+                                    { expiresIn : '24h'}
+                                )
                             });
                         }
                     })
                     .catch(error => {
+                        console.log('Erreur dans signup :', error);
                         res.status(500).json({ error });
                     })
             }
         })
         .catch(error => {
+            console.log('Erreur dans login :', error);
             res.status(500).json({ error });
         })
 };

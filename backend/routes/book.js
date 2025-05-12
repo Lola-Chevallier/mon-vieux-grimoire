@@ -1,14 +1,8 @@
-const router = express.Router();
 const express = require('express');
+const router = express.Router();
 const bookCtrl = require('../controllers/book');
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
-
-// Ajout conseillé par chat gpt car error 404 sans ça
-router.get('/', (req, res, next) => {
-    res.status(200).json({ message: 'Bienvenue sur l\'API' });
-    next();
-});
 
 // Route ajout livre
 router.post('/', auth, multer, bookCtrl.createBook);
@@ -23,6 +17,9 @@ router.delete('/:id',auth, bookCtrl.deleteBook);
 router.get('/:id',auth, bookCtrl.getOneBook);
 
 // Route affichages livres
-router.get('/',auth, bookCtrl.getAllBooks);
+router.get('/', auth, bookCtrl.getAllBooks);
+
+// Route pour ajouter une note à un livre
+router.post('/:id/rating', auth, bookCtrl.rateBook);
 
 module.exports = router;

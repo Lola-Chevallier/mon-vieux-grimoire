@@ -14,7 +14,7 @@ exports.createBook = (req, res, next) => {
 
     book.save()
         .then(() => { res.status(201).json({ message: 'Livre enregistré !' }) })
-    .catch(error => {res.status(400).json({ error })})
+        .catch(error => { res.status(400).json({ error }) })
 };
 
 exports.modifyBook = (req, res, next) => {
@@ -42,11 +42,11 @@ exports.modifyBook = (req, res, next) => {
 exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
         .then(book => {
-            if (thing.userId != req.auth.userId) {
+            if (book.userId != req.auth.userId) {
                 res.status(401).json({ message: 'Non autorisé !'})
             } else {
                 const filename = book.imageUrl.split('/images/')[1];
-                fs.unlik(`images/${filename}`, () => {
+                fs.unlink(`images/${filename}`, () => {
                     Book.deleteOne({ _id: req.params.id })
                         .then(() => { res.status(200).json({ message: 'Livre supprimé !' }) })
                         .catch(error => res.status(401).json({ error }));
@@ -56,7 +56,6 @@ exports.deleteBook = (req, res, next) => {
         .catch(error => {
             res.status(500).json({ error });
         });
-
 };
 
 exports.getOneBook = (req, res, next) => {
@@ -70,3 +69,37 @@ exports.getAllBooks = (req, res, next) => {
         .then(books => res.status(200).json(books))
         .catch(error => res.status(400).json({ error }));
 };
+
+exports.rateBook = async (req, res) => {
+    try {
+      const bookId = req.params.id;
+      const userId = req.auth.userId; // récupéré grâce au middleware d'authentification
+      const { rating } = req.body;
+  
+      // Vérification de la validité de la note
+      if (typeof rating !== 'number' || rating < 0 || rating > 5) {
+        return res.status(400).json({ message: 'La note doit être un nombre entre 0 et 5.' });
+      }
+  
+      const book = await Book.findById(bookId);
+      if (!book) return res.status(404).json({ message: 'Livre non trouvé.' });
+  
+      // Vérification que l'utilisateur n'a pas déjà noté ce livre
+      if (book.ratings.some(r => r.userId === userId)) {
+        return res.status(400).json({ message: 'Vous avez déjà noté ce livre.' });
+      }
+  
+      // Ajout de la nouvelle note
+      book.ratings.push({ userId, grade: rating });
+  
+      // Calcul de la nouvelle moyenne
+      const total = book.ratings.reduce((sum, r) => sum + r.grade, 0);
+      book.averageRating = Number((total / book.ratings.length).toFixed(2));
+  
+      await book.save();
+  
+      res.status(201).json(book);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
