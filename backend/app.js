@@ -27,6 +27,9 @@ app.get('/', (req, res) => {
 app.use('/api/books', bookRoutes);
 app.use('/api/auth', userRoutes);
 
-
+// servir les images statiques
+const path = require('path');
+app.use('/images', express.static(path.join(__dirname, 'images')));
+console.log('Dossier statique images exposé:', path.join(__dirname, 'images'));
 
 module.exports = app;

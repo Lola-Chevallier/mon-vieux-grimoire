@@ -4,8 +4,10 @@ const bookCtrl = require('../controllers/book');
 const auth = require('../middleware/auth');
 const multer = require('../middleware/multer-config');
 
-// Route ajout livre
-router.post('/', auth, multer, bookCtrl.createBook);
+// Route pour ajouter une note à un livre
+router.post('/:id/rating', auth, bookCtrl.rateBook);
+
+router.get('/bestrating', bookCtrl.bestRatingBook);
 
 // Route modification livre
 router.put('/:id',auth, multer, bookCtrl.modifyBook);
@@ -14,12 +16,12 @@ router.put('/:id',auth, multer, bookCtrl.modifyBook);
 router.delete('/:id',auth, bookCtrl.deleteBook);
 
 // Route affichage livre unique
-router.get('/:id',auth, bookCtrl.getOneBook);
+router.get('/:id', bookCtrl.getOneBook);
 
 // Route affichages livres
-router.get('/', auth, bookCtrl.getAllBooks);
+router.get('/', bookCtrl.getAllBooks);
 
-// Route pour ajouter une note à un livre
-router.post('/:id/rating', auth, bookCtrl.rateBook);
+// Route ajout livre
+router.post('/', auth, multer, bookCtrl.createBook);
 
 module.exports = router;
